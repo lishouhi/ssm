@@ -1,0 +1,163 @@
+<html>
+<head>
+    <title></title>
+    <meta charset="gb2312" />
+    <link href="index_98a4774.css" rel="stylesheet" />
+    <link href="index_body.css" rel="stylesheet" />
+
+    <script type="text/javascript" src="/Scripts/jquery-1.8.1.js"></script>
+    <script type="text/javascript" src="toolbarMgr.js"></script>
+
+    <script type="text/javascript">
+
+
+        $(function () {
+            // 地图初始化
+            var toolbars = [
+                // 雷达选择
+                new ToolbarMgrPkg({ container: "#ui3_city_change", boxopt: ".boxopt", popup: ".map_popup" }),
+                // 工具
+                new ToolbarMgrPkg({ container: "#toolbar1", boxopt: ".boxopt", popup: ".detail-box" }),
+                // 用户
+                new ToolbarMgrPkg({ container: "#user-center", boxopt: ".avatar-abstract", popup: ".info-box" })];
+            
+            // 地图初始化
+            for (e in toolbars) {
+                toolbars[e].bind();
+            }
+            
+
+            // 地图初始化
+            //mapModel.map_init();
+        });
+    </script>
+</head>
+<body>
+    <div id="app-right-top">
+        <div id="user-center" class="ui3-user-center-wrap" style="visibility: visible;">
+            <div class="avatar-abstract" style="background-image: url('/Content/image/user.jpg');"></div>
+            <div class="info-box clearfix" style="display: none;">
+                <div class="arrow"></div><div class="detail-info-box">
+                    <div class="up-zone">
+                        <div class="login-wrapper">
+                            <div class="left avatar" style="background-image:url(/Content/image/user.jpg)"></div>
+                            <div class="right user-info">
+                                <div class="username text-overflow">您好，姚家群</div>
+                                <div class="associate-tip">海关总署\广东分署\广东分中心\客户服务部</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mylocation-box bottom-split">
+                        <ul class="list">
+                            <li>
+                                <i class="icon home"></i>
+                                <div class="mylocation-box" data-target="home">
+                                    <span class="caption">大铲雷达</span><span class="addr color-weak text-overflow">大铲岛2号山头</span>
+                                    <span class="setting"><a href="javascript:;" data-action="edit" class="edit"></a></span>
+                                </div>
+                            </li>
+                            <li>
+                                <i class="icon company"></i>
+                                <div class="mylocation-box" data-target="company">
+                                    <span class="caption">蛇口雷达</span>
+                                    <span class="addr color-weak text-overflow">蛇口SCT大楼1号雷达</span>
+                                    <span class="setting"><a href="javascript:;" data-action="edit" class="edit"></a></span>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="bottom-split">
+                        <ul class="list">
+                            <li><a data-name="groupon" href="http://www.nuomi.com/uc/order/order?status=all" target="_blank" class="need-login"><i class="icon groupon"></i><span class="color-strong">团购订单</span></a></li>
+                            <li><a data-name="movie" href="https://dianying.baidu.com/user/orderlist?channel=map&amp;client=pc" target="_blank" class="need-login"><i class="icon movie"></i><span class="color-strong">电影订单</span></a></li>
+                            <li><a data-name="takeout" href="http://waimai.baidu.com/waimai?qt=orderlist" target="_blank" class="need-login"><i class="icon takeout"></i><span class="color-strong">外卖订单</span></a></li>
+                        </ul>
+                    </div>
+                    <div class="bottom-split">
+                        <ul class="list">
+                            <li><a href="javascript:;" class="my-fav need-login" data-name="fav"><i class="icon fav"></i><span class="color-strong">我的收藏</span></a></li>
+                            <li><a data-name="mycenter" href="http://map.baidu.com/ugc/user/index" target="_blank" class="need-login"><i class="icon center"></i><span class="color-strong">我的主页</span></a></li>
+                            <li><a data-name="accoutsetting" href="https://passport.baidu.com/center" target="_blank" class="need-login"><i class="icon setting"></i><span class="color-strong">账号设置</span></a></li>
+                        </ul>
+                    </div>
+                    <div class="exit">
+                        <a data-name="quit" href="javascript:;" class="logout color-weak">退出账号</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="tool-container" class="toolscontainer">
+            <div class="ui3-control-wrap clearfixs" id="ui3_control_wrap">
+                <div class="ui3-city-change-content " id="ui3_city_change">
+                    <!-- 主菜单 -->
+                    <div class="boxopt" map-on-click="box">
+                        <span class="radar-item" id="radar" ><img alt="天气" src="/Content/image/radar/radar_point.png"></span>
+                        <a href="#" map-on-click="selectCity" onclick="return false" class="ui3-city-change-inner ui3-control-shadow">
+                            <span>大铲雷达</span><em></em>
+                        </a>
+                    </div>
+                    <div class="map_popup " style="width: 283px; display: none; height: 80px; right: 0px; top: 47px;">
+                        <div class="popup_main">
+                            <div class="title">雷达列表</div>
+                            <div class="content" style="overflow: hidden;">
+                                <div class="sel_city">
+                                    <div id="radar-list-detail" class="" style="display: block; width: 317px; height: 80px; right: 69px; top: 57px">
+                                        <ul class="list">
+                                            <li>
+                                                <i class="icon default"></i>
+                                                <div class="mylocation-box">
+                                                    <span class="caption">大铲雷达</span><span class="addr color-weak text-overflow">大铲岛2号山头</span>
+                                                    <span class="setting"><a href="javascript:;" data-action="edit" class="edit">设为默认</a></span>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <i class="icon none"></i>
+                                                <div class="mylocation-box">
+                                                    <span class="caption">蛇口雷达</span>
+                                                    <span class="addr color-weak text-overflow">蛇口SCT大楼</span>
+                                                    <span class="setting"><a href="javascript:;" data-action="edit" class="edit">设为默认</a></span>
+                                                </div>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            <button id="popup_close" title="关闭"></button>
+                        </div>
+                        <div class="poput_shadow" style="height: 80px;"></div>
+                    </div>
+                </div>
+
+                <div class="left float-l">
+                    <b class="tool-gap"></b>
+                    <div class="trafficopt" map-on-click="traffic">
+                        <span id="traffic_control" class="last traffic"></span><i>隐藏图例</i>
+                    </div>
+                    <b></b>
+                </div>
+
+                <!-- 我们想要改成这样，每个工具条一个div -->
+                <div id="toolbar1" class="left float-l">
+                    <!-- 主菜单 -->
+                    <div class="boxopt" map-on-click="box">
+                        <span id="util_control" class="boxutils boxicon"></span>
+                        <i class="boxtext">工具</i><em></em>
+                    </div>
+                    <!-- 弹出内容 -->
+                    <div class="detail-box" style="display: none;">
+                        <ul id="boxul" class="boxinfo">
+                            <li class="map-measure" map-on-click="measure"><span class="last measure"></span><i>历史图库</i></li>
+                            <li class="map-mark" map-on-click="mark"><span class="last mark"></span><i>登录日志</i></li>
+                            <li class="map-share" map-on-click="share"><span class="last share"></span><i>登录时长统计</i></li>
+                            <li class="map-share" map-on-click="share"><span class="last share"></span><i>异常船舶统计</i></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+
+
+</body>
+</html>
