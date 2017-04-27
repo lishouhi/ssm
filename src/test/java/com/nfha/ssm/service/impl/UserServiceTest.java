@@ -40,12 +40,14 @@ public class UserServiceTest {
 	@Test
 	public void testGetUserById() throws Exception {
 		User user = userSvc.getUserById(1);
+
 		logger.info(JSON.toJSONString(user));
 	}
 
 	@Test
 	public void testgetUserAll() throws Exception {
 		List<User> user = userSvc.getUserAll();
+
 		logger.info(JSON.toJSONString(user));
 	}
 
