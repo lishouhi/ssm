@@ -1260,14 +1260,31 @@ var SUPMAP_DRAWING_MARKER = "marker", // 鼠标画点模式
 
         //添加遮罩，所有鼠标操作都在这个遮罩上完成
         if (!this._mask) {
-            this._mask = new SuperMap.Layer.Vector("图形绘制");
-            this._mask.style = {
+            //新建一个策略并使用在矢量要素图层(vector)上。
+            var strategy = new SuperMap.Strategy.GeoText();
+            strategy.style = {
+                fontColor:"#7a7a7a",
+                //fontWeight:"bolder",
+                fontSize:"11px",
+                fill: true,
+                fillColor: "#FFFFFF",
+                fillOpacity: 1,
+                stroke: true,
+                strokeWidth:1,
+                strokeColor:"#FF0000",
+                strokeDashstyle:'solid',
+                labelXOffset:16,
+                labelYOffset:-15
+            };
+
+            this._mask = new SuperMap.Layer.Vector("图形绘制",{strategies: [strategy]});
+            /*this._mask.style = {
                 strokeColor: "#304DBE",
                 strokeWidth: 2,
                 pointerEvents: "visiblePainted",
                 fillColor: "#304DBE",
                 fillOpacity: 0.8
-            };
+            };*/
         }
 
         if (this._drawFeature == null) {
@@ -1320,52 +1337,65 @@ var SUPMAP_DRAWING_MARKER = "marker", // 鼠标画点模式
         //停止画面控制
         meDrawingManager._drawFeature.deactivate();
 
-
+        //this._transform()
         //获得图层几何对象
-        var geometry = drawGeometryArgs.feature.geometry,
-        measureParam = new SuperMap.REST.MeasureParameters(geometry), /* MeasureParameters：量算参数类。 客户端要量算的地物间的距离或某个区域的面积*/
-        myMeasuerService = new SuperMap.REST.MeasureService(encodeURI(meDrawingManager._map.baseLayer.url)); //量算服务类，该类负责将量算参数传递到服务端，并获取服务端返回的量算结果
-        myMeasuerService.events.on({
-            "processCompleted": function(measureEventArgs) {
-                var distance = measureEventArgs.result.distance;
-                var unit = measureEventArgs.result.unit;
-                alert("量算结果:" + distance + "米");
-            }
-        });
-
-        
-        //console.log(geometry.getVertices().length);
+        var geometry = drawGeometryArgs.feature.geometry;
 
         var pointVector = new SuperMap.Feature.Vector(geometry.getVertices()[0]);
-        pointVector.style = {
+        var pointVector1 = new SuperMap.Feature.Vector(geometry.getVertices()[1]);
+        pointVector.style = pointVector1.style = {
             fillColor: 'white',
             strokeColor: 'red',
-            pointRadius: 3,
+            pointRadius: 4,
             fontWeight: "bold",
-            label: '起点',
+            //label: '起点',
             labelSelect: "true",
             labelXOffset: 20,
             labelYOffset:20
         };
 
-        var pointVector1 = new SuperMap.Feature.Vector(geometry.getVertices()[1]);
-        pointVector1.style = {
-            fillColor: 'white',
-            strokeColor: 'red',
-            pointRadius: 3,
-            fontWeight: "bold",
-            label: '终点',
-            labelSelect: "true",
-            labelXOffset: 20,
-            labelYOffset: 20
-        };
+        var geoTextFeatures = [],
+            prevPointClone;
+
+        for (var i = 0;i<geometry.getVertices().length;i++) {
+            var geoText = null,
+                geoTextFeature = null,
+                currPoint = geometry.getVertices()[i],
+                currPointClone = geometry.getVertices()[i].clone();
+
+            if(i==0){
+                geoText = new SuperMap.Geometry.GeoText(currPoint.x, currPoint.y,"起点");
+                prevPointClone = currPointClone;
+            }
+            else{
+                var p1 = meDrawingManager._transform(prevPointClone);
+                var p2 = meDrawingManager._transform(currPointClone);
+                var d = meDrawingManager._getDistance(p1.x,p1.y,p2.x,p2.y);
+
+                geoText = new SuperMap.Geometry.GeoText(currPoint.x, currPoint.y,"总长：" + d + "公里");
+
+                prevPointClone = currPointClone;
+            }
+
+            geoTextFeature  = new SuperMap.Feature.Vector(geoText);
+            geoTextFeatures.push(geoTextFeature)
+        }
+
+        meDrawingManager._mask.addFeatures(geoTextFeatures);
+
+        //var startGeoText = new SuperMap.Geometry.GeoText(geometry.getVertices()[0].x, geometry.getVertices()[0].y,"起点");
+        //var startGeoTextFeature = new SuperMap.Feature.Vector(startGeoText);
+
+        //var endGeoText = new SuperMap.Geometry.GeoText(geometry.getVertices()[1].x, geometry.getVertices()[1].y,"终点");
+        //var endGeoTextFeature = new SuperMap.Feature.Vector(endGeoText);
 
         //添加矢量图形覆盖物
         meDrawingManager._mask.addFeatures([pointVector, pointVector1]);
+        //meDrawingManager._mask.addFeatures([startGeoTextFeature, endGeoTextFeature]);
 
         //对MeasureService类型进行判断和赋值，当判断出是LineString时设置MeasureMode.DISTANCE，否则是MeasureMode.AREA
-        myMeasuerService.measureMode = SuperMap.REST.MeasureMode.DISTANCE;
-        myMeasuerService.processAsync(measureParam); //processAsync负责将客户端的量算参数传递到服务端。
+        //myMeasuerService.measureMode = SuperMap.REST.MeasureMode.DISTANCE;
+        //myMeasuerService.processAsync(measureParam); //processAsync负责将客户端的量算参数传递到服务端。
     }
 
     /**
@@ -1444,6 +1474,52 @@ var SUPMAP_DRAWING_MARKER = "marker", // 鼠标画点模式
             //closeInstanceExcept(this);
             this._setDrawingMode(drawingType);
         }
+    }
+
+    /**
+     * 将用角度表示的角转换为近似相等的用弧度表示的角
+     */
+    DrawingManager.prototype._getRad = function(d){
+        return d * Math.PI / 180.0;
+    }
+
+    /**
+     * 谷歌地图计算两个坐标点的距离
+     * @param lng1  经度1
+     * @param lat1  纬度1
+     * @param lng2  经度2
+     * @param lat2  纬度2
+     * @return 距离（千米）
+     */
+    DrawingManager.prototype._getDistance = function(lng1,lat1,lng2,lat2){
+        var radLat1 = this._getRad(lat1);
+        var radLat2 = this._getRad(lat2);
+
+        var a = radLat1 - radLat2;
+        var b = this._getRad(lng1) - this._getRad(lng2);
+
+        var s = 2 * Math.asin(Math.sqrt(Math.pow(Math.sin(a / 2), 2)
+                + Math.cos(radLat1) * Math.cos(radLat2)
+                * Math.pow(Math.sin(b / 2), 2)));
+        s = s * 6378.137;
+        s = Math.round(s * 10000) / 10000;
+
+        return s;
+    }
+
+    /**
+     * 坐标转换
+     * @private
+     * @type {Object}
+     */
+    DrawingManager.prototype._transform = function(obj) {
+        if (obj && obj.CLASS_NAME && (obj.CLASS_NAME == 'SuperMap.LonLat' || obj.CLASS_NAME == 'SuperMap.Geometry.Point')) {
+            //坐标转换
+            obj.transform('EPSG:3857', 'EPSG:4326');
+            return obj;
+        }
+
+        throw new Error("not a valid SuperMap.LonLat or SuperMap.Geometry.Point object");
     }
 
 })();
