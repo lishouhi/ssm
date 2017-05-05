@@ -1262,10 +1262,11 @@ var SUPMAP_DRAWING_MARKER = "marker", // 鼠标画点模式
         if (!this._mask) {
             //新建一个策略并使用在矢量要素图层(vector)上。
             var strategy = new SuperMap.Strategy.GeoText();
+            strategy.isOverLay = false;
             strategy.style = {
                 fontColor:"#7a7a7a",
                 //fontWeight:"bolder",
-                fontSize:"11px",
+                fontSize:"13px",
                 fill: true,
                 fillColor: "#FFFFFF",
                 fillOpacity: 1,
@@ -1277,14 +1278,20 @@ var SUPMAP_DRAWING_MARKER = "marker", // 鼠标画点模式
                 labelYOffset:-15
             };
 
+            //用于标签分组的属性字段名称
+            strategy.groupField = "labelGroup";
+            //标签分组数组
+            strategy.styleGroups = [{
+                start:0,
+                end:100,
+                style:{
+                    //fontColor:"#FF4500",
+                    //fontWeight:"bolder",
+                    fontSize:"15px"
+                }
+            }];
+
             this._mask = new SuperMap.Layer.Vector("图形绘制",{strategies: [strategy]});
-            /*this._mask.style = {
-                strokeColor: "#304DBE",
-                strokeWidth: 2,
-                pointerEvents: "visiblePainted",
-                fillColor: "#304DBE",
-                fillOpacity: 0.8
-            };*/
         }
 
         if (this._drawFeature == null) {
@@ -1334,68 +1341,80 @@ var SUPMAP_DRAWING_MARKER = "marker", // 鼠标画点模式
      * 绘制完成事件
      */
     DrawingManager.prototype._drawCompleted = function (drawGeometryArgs) {
+
+        //声明变量
+        var geoTextFeatures = [],
+            prevPointClone,
+            prevDistance = 0,
+            sumDistance = 0,
+            points = [];
+
         //停止画面控制
         meDrawingManager._drawFeature.deactivate();
 
-        //this._transform()
         //获得图层几何对象
         var geometry = drawGeometryArgs.feature.geometry;
 
-        var pointVector = new SuperMap.Feature.Vector(geometry.getVertices()[0]);
-        var pointVector1 = new SuperMap.Feature.Vector(geometry.getVertices()[1]);
-        pointVector.style = pointVector1.style = {
-            fillColor: 'white',
-            strokeColor: 'red',
-            pointRadius: 4,
-            fontWeight: "bold",
-            //label: '起点',
-            labelSelect: "true",
-            labelXOffset: 20,
-            labelYOffset:20
-        };
+        //声明点并存入数组
+        for (var i = 0;i<geometry.getVertices().length;i++) {
+            var point = new SuperMap.Feature.Vector(geometry.getVertices()[i]);
+            point.style = {
+                fillColor: 'white',
+                strokeColor: 'red',
+                pointRadius: 4,
+                fontWeight: "bold",
+                //label: '起点',
+                labelSelect: "true",
+                labelXOffset: 20,
+                labelYOffset:20
+            };
 
-        var geoTextFeatures = [],
-            prevPointClone;
+            points.push(point);
+        }
 
+        //声明Label并存入数组，同时计算2点之间距离及总距离
         for (var i = 0;i<geometry.getVertices().length;i++) {
             var geoText = null,
                 geoTextFeature = null,
-                currPoint = geometry.getVertices()[i],
-                currPointClone = geometry.getVertices()[i].clone();
+                currPoint = new SuperMap.Geometry.Point(geometry.getVertices()[i].x, geometry.getVertices()[i].y),
+                currPointClone = new SuperMap.Geometry.Point(currPoint.x, currPoint.y),
+                labelText = '';
 
-            if(i==0){
+            if( i == 0 ){
                 geoText = new SuperMap.Geometry.GeoText(currPoint.x, currPoint.y,"起点");
                 prevPointClone = currPointClone;
             }
             else{
                 var p1 = meDrawingManager._transform(prevPointClone);
                 var p2 = meDrawingManager._transform(currPointClone);
-                var d = meDrawingManager._getDistance(p1.x,p1.y,p2.x,p2.y);
+                prevDistance = meDrawingManager._getDistance(p1.x,p1.y,p2.x,p2.y);
+                sumDistance += prevDistance;
 
-                geoText = new SuperMap.Geometry.GeoText(currPoint.x, currPoint.y,"总长：" + d + "公里");
+                if(i == geometry.getVertices().length - 1){
+                    labelText = "总长:" + sumDistance.toFixed(1) + "公里";
+                }
+                else {
+                    labelText = sumDistance.toFixed(1) + "公里";
+                }
 
-                prevPointClone = currPointClone;
+                geoText = new SuperMap.Geometry.GeoText(currPoint.x, currPoint.y,labelText);
+                prevPointClone = currPoint;
+            }
+            if(i == geometry.getVertices().length - 1){
+                geoTextFeature  = new SuperMap.Feature.Vector(geoText,{ labelGroup:'1' });
+            }
+            else{
+                geoTextFeature  = new SuperMap.Feature.Vector(geoText);
             }
 
-            geoTextFeature  = new SuperMap.Feature.Vector(geoText);
             geoTextFeatures.push(geoTextFeature)
         }
 
+        //添加矢量图形覆盖物
+        meDrawingManager._mask.addFeatures(points);
         meDrawingManager._mask.addFeatures(geoTextFeatures);
 
-        //var startGeoText = new SuperMap.Geometry.GeoText(geometry.getVertices()[0].x, geometry.getVertices()[0].y,"起点");
-        //var startGeoTextFeature = new SuperMap.Feature.Vector(startGeoText);
-
-        //var endGeoText = new SuperMap.Geometry.GeoText(geometry.getVertices()[1].x, geometry.getVertices()[1].y,"终点");
-        //var endGeoTextFeature = new SuperMap.Feature.Vector(endGeoText);
-
-        //添加矢量图形覆盖物
-        meDrawingManager._mask.addFeatures([pointVector, pointVector1]);
-        //meDrawingManager._mask.addFeatures([startGeoTextFeature, endGeoTextFeature]);
-
-        //对MeasureService类型进行判断和赋值，当判断出是LineString时设置MeasureMode.DISTANCE，否则是MeasureMode.AREA
-        //myMeasuerService.measureMode = SuperMap.REST.MeasureMode.DISTANCE;
-        //myMeasuerService.processAsync(measureParam); //processAsync负责将客户端的量算参数传递到服务端。
+        meDrawingManager._isOpen = false;
     }
 
     /**
