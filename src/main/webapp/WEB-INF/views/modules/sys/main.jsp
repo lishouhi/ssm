@@ -51,7 +51,8 @@
             lineLayer,
             isTransform = true, //是否需要进行坐标转换
             sourceProjection = 'EPSG:3857',
-            destProjection = 'EPSG:4326';
+            destProjection = 'EPSG:4326',
+            drawManage = null;
 
         //页面初始化
         $(function() {
@@ -142,15 +143,14 @@
                 toolbars[e].bind();
             }
 
-            var drawManage = new SupMapLib.DrawingManager(map, { drawingMode: SUPMAP_DRAWING_POLYLINE });
+            drawManage = new SupMapLib.DrawingManager(map, { drawingMode: SUPMAP_DRAWING_POLYLINE });
 
             $(".map-measure").click(function () {
                 drawManage.open();
                 $(".boxopt").click();
             });
 
-            $(".map-share").click(function () {
-                //alert(3);
+            $(".map-clear").click(function () {
                 drawManage.clear();
                 $(".boxopt").click();
             });
@@ -272,7 +272,7 @@
                         <ul id="boxul" class="boxinfo">
                             <li class="map-measure" map-on-click="measure"><span class="last measure"></span><i>测距</i></li>
                             <li class="map-mark" map-on-click="mark"><span class="last mark"></span><i>标记</i></li>
-                            <li class="map-share" map-on-click="share"><span class="last share"></span><i>清除</i></li>
+                            <li class="map-clear" map-on-click="share"><span class="last share"></span><i>清除</i></li>
                             <!-- <li class="map-share" map-on-click="share"><span class="last share"></span><i>异常船舶统计</i></li>-->
                         </ul>
                     </div>
