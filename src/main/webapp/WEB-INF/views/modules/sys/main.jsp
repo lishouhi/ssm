@@ -214,7 +214,7 @@
                     <!-- 主菜单 -->
                     <div  map-on-click="box">
                         <span class="adjustpadding"></span>
-                        <span class="radar-item" id="radar" ><img alt="天气" src="/ssm/static/maptoolbar/Content/image/3.png"></span>
+                        <span class="radar-item" id="radar" ><img alt="天气" src="${ctxStaticRoot}/maptoolbar/Content/image/3.png"></span>
                         <a href="#" map-on-click="selectCity" onclick="return false" class="ui3-city-change-inner ui3-control-shadow">
                             <span>大铲雷达</span><em></em>
                         </a>

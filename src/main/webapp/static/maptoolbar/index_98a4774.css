@@ -197,7 +197,7 @@ a {
 
 @media only screen and (-webkit-min-device-pixel-ratio: 2),(-webkit-min-device-pixel-ratio:2),(min-resolution:2dppx),(min-resolution:192dpi) {
     #message-center .message-center-entrance {
-        background:url(/ssm/static/maptoolbar/Content/image/new_retain_c1648fb.png) no-repeat -37px -84px #fff;
+        background:url(/static/maptoolbar/Content/image/new_retain_c1648fb.png) no-repeat -37px -84px #fff;
         background-size: 280px auto
     }
 }
@@ -650,7 +650,7 @@ li :hover i {
 }
 
 #ui3_control_wrap .left span,#ui3_control_wrap .right span {
-    background-image: url(/ssm/static/maptoolbar/Content/image/new_retain_c1648fb.png);
+    background-image: url(./Content/image/new_retain_c1648fb.png);
     background-size: 280px 115px;
     background-repeat: no-repeat
 }
@@ -720,7 +720,7 @@ li :hover i {
     display: inline-block;
     width: 20px;
     height: 20px;
-    background: url((/ssm/static/maptoolbar/Content/image/usercenter-icons_c1d50cc.png);
+    background: url(/static/maptoolbar/Content/image/usercenter-icons_c1d50cc.png);
     background: -webkit-image-set(url(/Content/image/usercenter-icons_c1d50cc.png) 1x,url(/Content/image/usercenter-icons-2x_2f9c648.png) 2x);
     background: -moz-image-set(url(/Content/image/usercenter-icons_c1d50cc.png) 1x,url(/Content/image/usercenter-icons-2x_2f9c648.png) 2x);
     background: -o-image-set(url(/Content/image/usercenter-icons_c1d50cc.png) 1x,url(/Content/image/usercenter-icons-2x_2f9c648.png) 2x);
